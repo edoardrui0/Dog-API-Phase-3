@@ -1,37 +1,38 @@
 "use strict";
 
 function getDogImage(breed) {
-  fetch(`https://dog.ceo/api/breed/${breed}/images/random`)
+  fetch(`https://dog.ceo/api/breed/${breed}/images/random/1`)
     .then((response) => response.json())
-    .then((responseJson) => displayResults(responseJson))
-    .catch((error) => alert("Something went wrong. Try again later."));
+    .then((responseJson) => {
+      if (responseJson && responseJson.code !== 404) {
+        displayResults(responseJson, breed);
+      }
+    })
+    .catch((error) => {
+      $(".results").html(`<h2>Look at this dog!</h2>`);
+      $(".results").removeClass("hidden");
+    });
 }
 
-function displayResults(responseJson) {
+// my mentor helped me with the unhappy path case
+
+function displayResults(responseJson, breed) {
   console.log(responseJson);
+  $(".results").html(`<h2>Look at this dog!</h2>`);
 
-  if (responseJson.message == "Breed not found") {
-    alert("That breed wasn't found, please try another.");
-  } else {
-    //replace the existing image with the new one
-    $(".results").html(`<h2>Look at this dog!</h2>`);
+  $(".results").append(`<h3>${breed}</h3>`);
 
-    let splitUrl = responseJson.message.split("/");
-    let breedName = splitUrl[4];
-    $(".results").append(`<h3>${breedName}</h3>`);
-
-    $(".results").append(
-      `<img src="${responseJson.message}" class="results-img" width="200" height="auto">`
-    );
-    //display the results section
-    $(".results").removeClass("hidden");
-  }
+  $(".results").append(
+    `<img src="${responseJson.message[0]}" class="results-img" width="200" height="auto">`
+  );
+  //display the results section
+  $(".results").removeClass("hidden");
 }
 
 function watchForm() {
   $("form").submit((event) => {
     event.preventDefault();
-    let breedOfDog = $('input[name="breedOfDog"]').val();
+    let breedOfDog = $('input[name="breedOfDog"] ').val();
     getDogImage(breedOfDog);
   });
 }
